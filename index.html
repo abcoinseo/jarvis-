@@ -3,339 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AB Siddik's Jarvis - Auto Language & Personalities</title>
+    <title>AB Siddik's Jarvis - Voice & Visual Only</title>
     <style>
-        body {
-            background-color: #222;
-            color: #00FF00;
-            font-family: 'Roboto', sans-serif;
+        /* Resetting default styles */
+        body, html {
             margin: 0;
             padding: 0;
+            height: 100%;
+            overflow: hidden; /* Prevents scrollbars */
+        }
+
+        body {
+            background-color: #000; /* Dark Background */
+            color: #0A84FF; /* Cool Blue Text */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
+            text-align: center;
+            /* Grid background */
+            background-image: linear-gradient(to right, rgba(10, 132, 255, 0.1) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(10, 132, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px; /* Adjust grid size as needed */
         }
 
         #jarvis-container {
-            width: 70%;
-            max-width: 600px;
-            padding: 40px;
-            border: 1px solid #00FF00;
-            border-radius: 20px;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
-            text-align: center;
-            position: relative;
+            /* Take up full screen */
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
-        #jarvis-eye {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: #00FF00;
-            margin: 20px auto;
-            position: relative;
-            overflow: hidden;
-            animation: pulse 2s infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
-            }
-            100% {
-                box-shadow: 0 0 25px rgba(0, 255, 0, 0.8);
-            }
-        }
-
-        #jarvis-eye::before {
-            content: '';
-            position: absolute;
-            top: 25%;
-            left: 25%;
-            width: 50%;
-            height: 50%;
-            background-color: #111;
-            border-radius: 50%;
-            animation: pupil 3s linear infinite;
-        }
-
-        @keyframes pupil {
-            0%, 100% {
-                transform: translate(0, 0);
-            }
-            25% {
-                transform: translate(5px, 3px);
-            }
-            50% {
-                transform: translate(-3px, -5px);
-            }
-            75% {
-                transform: translate(-5px, 3px);
-            }
-        }
-
+        /* Listening Indicator (Central Circle) */
         #listening-indicator {
+            width: 150px; /* Adjust size as needed */
+            height: 150px;
+            border-radius: 50%;
+            border: 2px solid #0A84FF;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative; /* For absolute positioning of bars */
+            margin-bottom: 20px;
+        }
+
+        /* Waveform Bars */
+        .waveform-bar {
+            width: 4px;
+            background-color: #0A84FF;
+            margin: 0 2px;
+            height: 2px; /* Initial height */
+            transform-origin: bottom;
+        }
+
+        /* Arrange bars horizontally */
+        #waveform-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 5px; /* Space between bars and "Listening" text */
+        }
+
+        /* "Listening" Text */
+        #listening-text {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            color: #FFFF00;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             font-size: 0.8em;
-            font-style: italic;
-            display: none;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
-
-        #personality-toggle {
-            padding: 10px 20px;
-            background-color: #00FF00;
-            color: #222;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Roboto', sans-serif;
-            margin-top: 20px;
-        }
-
-        /* Modern Style */
-        body {
-            background-color: #222; /* Dark Background */
-            color: #00FF00; /* Green Text */
-            font-family: 'Arial', sans-serif; /* A more modern font */
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden; /* Prevent scrollbars */
-        }
-
-        #jarvis-container {
-            width: 80%;
-            max-width: 700px; /* Slightly larger container */
-            padding: 40px;
-            border: 2px solid #00FF00; /* Stronger border */
-            border-radius: 25px; /* More rounded corners */
-            box-shadow: 0 0 40px rgba(0, 255, 0, 0.6); /* Enhanced glow */
-            text-align: center;
-            position: relative;
-        }
-
-        #jarvis-eye {
-            width: 90px; /* Slightly larger eye */
-            height: 90px;
-            border-radius: 50%;
-            background-color: #00FF00;
-            margin: 20px auto;
-            position: relative;
-            overflow: hidden;
-            animation: pulse 2.5s infinite alternate; /* Slower pulse */
-        }
-
-        /* Pulse animation for the eye */
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 15px rgba(0, 255, 0, 0.9); /* Brighter glow */
-            }
-            100% {
-                box-shadow: 0 0 30px rgba(0, 255, 0, 0.9); /* Even brighter glow */
-            }
-        }
-
-        /* Pupil styles */
-        #jarvis-eye::before {
-            content: '';
-            position: absolute;
-            top: 25%;
-            left: 25%;
-            width: 50%;
-            height: 50%;
-            background-color: #111;
-            border-radius: 50%;
-            animation: pupil 3.5s linear infinite; /* Slower pupil movement */
-        }
-
-        @keyframes pupil {
-            0%, 100% {
-                transform: translate(0, 0);
-            }
-            25% {
-                transform: translate(7px, 4px);
-            }
-            50% {
-                transform: translate(-4px, -7px);
-            }
-            75% {
-                transform: translate(-7px, 4px);
-            }
-        }
-
-        /* Listening indicator styles */
-        #listening-indicator {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            color: #FFFF00;
-            font-size: 1em; /* Slightly larger */
-            font-style: italic;
-            display: none;
-        }
-
-        /* Personality toggle button styles */
-        #personality-toggle {
-            padding: 12px 25px;
-            background-color: #00FF00;
-            color: #222;
-            border: none;
-            border-radius: 7px; /* More rounded corners */
-            cursor: pointer;
-            font-family: 'Arial', sans-serif;
-            font-weight: bold;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5); /* Glow on the button */
-        }
-
-        #personality-toggle:hover {
-            background-color: #00CC00;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.7); /* Stronger hover effect */
-        }
-
     </style>
 </head>
 <body>
 
     <div id="jarvis-container">
-        <div id="jarvis-eye"></div>
-        <h1>AB Siddik's Jarvis - Enhanced Edition</h1>
-        <p id="listening-indicator">Listening...</p>
-        <button id="personality-toggle" onclick="togglePersonality()">Switch Personality</button>
+        <div id="listening-indicator">
+            <div id="waveform-container">
+                <div class="waveform-bar"></div>
+                <div class="waveform-bar"></div>
+                <div class="waveform-bar"></div>
+                <div class="waveform-bar"></div>
+                <div class="waveform-bar"></div>
+                <div class="waveform-bar"></div>
+                <div class="waveform-bar"></div>
+                <div class="waveform-bar"></div>
+                <div class="waveform-bar"></div>
+                <div class="waveform-bar"></div>
+            </div>
+            <div id="listening-text">Listening</div>
+        </div>
     </div>
 
     <script>
-        //Load franc.js
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/franc@6.1.0/franc.min.js';
-        document.head.appendChild(script);
+    //Load franc.js
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/franc@6.1.0/franc.min.js';
+    document.head.appendChild(script);
 
-       // API Key (NEVER commit this to public repos!)
-        const API_KEY = "AIzaSyDyu0thYNv9bhUlpRxxQbWZq59Wfm9ZDGc";
-        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=" + API_KEY;
+   // API Key (NEVER commit this to public repos!)
+    const API_KEY = "AIzaSyDyu0thYNv9bhUlpRxxQbWZq59Wfm9ZDGc";
+    const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=" + API_KEY;
 
         // DOM Elements
         const listeningIndicator = document.getElementById("listening-indicator");
-        const personalityToggle = document.getElementById("personality-toggle");
+        const waveformBars = document.querySelectorAll(".waveform-bar");
 
         // Speech Recognition Setup
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
-        let currentPersonality = 1; // 1 or 2
-        const personalityPrompts = {
-            1: "You are a helpful and friendly AI assistant named Jarvis.",
-            2: "You are a sarcastic and witty AI assistant named Jarvis."
-        };
-
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            recognition.onstart = function() {
-                console.log("Speech recognition started");
-                listeningIndicator.style.display = "block";
-            };
-
-            recognition.onresult = function(event) {
-                const speechResult = event.results[0][0].transcript;
-                console.log("Heard: " + speechResult);
-                detectAndProcess(speechResult);
-            };
-
-            recognition.onspeechend = function() {
-                console.log("Speech ended");
-                stopRecognition();
-            };
-
-            recognition.onerror = function(event) {
-                console.error("Speech recognition error:", event.error);
-                speak("Sorry, I encountered an error. Please try again.");
-                stopRecognition();
-            };
-
-            recognition.onend = function() {
-                console.log("Speech recognition ended");
-                stopRecognition();
-                startRecognition(); // Auto-restart
-            };
-        } else {
-            alert("Speech recognition is not supported in this browser.");
-        }
+        let audioContext = null;
+        let analyser = null;
 
         // Text-to-Speech
         let speechSynth = window.speechSynthesis;
+
+        //Initialize Audio
 
         function speak(text) {
             if (speechSynth.speaking) {
                 speechSynth.cancel();
             }
             let utterThis = new SpeechSynthesisUtterance(text);
-            utterThis.voice = getVoice();
             utterThis.pitch = 1;
             utterThis.rate = 1;
 
             speechSynth.speak(utterThis);
         }
 
-        function getVoice() {
-            let voices = speechSynth.getVoices();
-            //return a male voice if available
-            for (let i = 0; i < voices.length; i++) {
-                if (voices[i].name.includes("Daniel")) {
-                    return voices[i];
+        // Analyze Audio to control the visualy
+        function analyzeAudio() {
+            if (!audioContext) return;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                analyser.getByteFrequencyData(dataArray);
+
+                for (let i = 0; i < waveformBars.length; i++) {
+                    const barHeight = dataArray[i % bufferLength] / 2; // Scaling factor
+                    waveformBars[i].style.height = `${barHeight}px`;
                 }
+                requestAnimationFrame(draw);
             }
-            return null;
+            draw();
         }
 
-        // Language Detection and Command Processing
-        async function detectAndProcess(command) {
-            if (typeof franc === 'undefined') {
-                console.warn("franc.js not loaded yet.  Trying again shortly.");
-                setTimeout(() => detectAndProcess(command), 500);
-                return;
-            }
-
-            try {
-                const detectedLangCode = franc(command, {minLength: 3}); //franc detect
-
-                // If the detected language is 'und', it means the language couldn't be determined.
-                if (detectedLangCode === 'und') {
-                    console.warn("Could not detect language.  Defaulting to English.");
-                    processCommand(command, 'en');  // Default to English
-                } else {
-                    const languageCodeMap = {
-                        'eng': 'en', // English
-                        'spa': 'es', // Spanish
-                        'fra': 'fr', // French
-                        // Add more language codes as needed, mapping from franc to a more generic code
-                    };
-
-                    const genericLangCode = languageCodeMap[detectedLangCode] || 'en';  //Default to en
-                    processCommand(command, genericLangCode);
-                }
-            } catch (error) {
-                console.error("Language detection error:", error);
-                processCommand(command, 'en'); // Fallback to English
-            }
-        }
-
-        // Process Command
-        async function processCommand(command, languageCode) {
-            const prompt = personalityPrompts[currentPersonality];
-            const geminiPrompt = `${prompt}  The user said: ${command}`;
+        async function processCommand(command) {
 
             try {
                 const response = await fetch(GEMINI_API_URL, {
@@ -345,7 +166,7 @@
                     },
                     body: JSON.stringify({
                         contents: [{
-                            parts: [{ text: geminiPrompt }],
+                            parts: [{ text: command }],
                         }],
                     }),
                 });
@@ -362,8 +183,7 @@
                 if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
                     jarvisResponseText = data.candidates[0].content.parts[0].text;
                 }
-               //For backend translate api and multi langue suppot
-               //translateAndSpeak(jarvisResponseText, languageCode)
+
                 speak(jarvisResponseText);
 
             } catch (error) {
@@ -372,37 +192,84 @@
             }
         }
 
+        // Language Detection and Command Processing
+        async function detectAndProcess(command) {
 
-        // Stop Recognition
-        function stopRecognition() {
-            if (recognition && recognition.readyState === 'listening') {
-                recognition.stop();
+            try {
+                const detectedLangCode = franc(command, {minLength: 3}); //franc detect
+            } catch (error) {
+                console.error("Language detection error:", error);
+                processCommand(command); // Fallback to English
             }
-            listeningIndicator.style.display = "none";
+            processCommand(command);
         }
 
-        // Start Recognition
-        function startRecognition() {
-            if (recognition) {
-                try {
-                    recognition.start();
-                } catch (error) {
-                    console.error("Recognition start error:", error);
-                    speak("Failed to start listening. Please try again.");
-                }
+        if (SpeechRecognition) {
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = function() {
+                console.log("Speech recognition started");
+                listeningIndicator.style.display = "block";
+            };
+
+            recognition.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript;
+                console.log("Heard: " + speechResult);
+                detectAndProcess(speechResult);
+            };
+
+            recognition.onspeechend = function() {
+                console.log("Speech ended");
+
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Speech recognition error:", event.error);
+                speak("Sorry, I encountered an error. Please try again.");
+
+            };
+
+            recognition.onend = function() {
+                console.log("Speech recognition ended");
+                recognition.start();
+            };
+        } else {
+
+            console.log("Speech recognition is not supported in this browser.");
+        }
+
+        // Initilization of audio
+        function initializeAudio() {
+            try {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioContext();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        const source = audioContext.createMediaStreamSource(stream);
+                        source.connect(analyser);
+                        analyser.connect(audioContext.destination);
+                        analyzeAudio();
+                        recognition.start();
+
+                    })
+                    .catch(err => {
+                        console.error('Error accessing microphone:', err);
+
+                    });
+            } catch (e) {
+                console.error('Web Audio API is not supported in this browser');
             }
         }
-
-        // Toggle Personality
-        function togglePersonality() {
-            currentPersonality = (currentPersonality === 1) ? 2 : 1;
-            personalityToggle.textContent = `Switch to Personality ${currentPersonality === 1 ? 2 : 1}`;
-            speak(`Switching to personality ${currentPersonality}`);
-        }
-
-        // Attempt Auto-Start on Load
+        //Initilize start to audio
         document.addEventListener("DOMContentLoaded", () => {
-            startRecognition();
+            initializeAudio();
         });
 
     </script>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AB Siddik's Jarvis - Microphone Focus</title>
+    <title>AB Siddik's Jarvis - Stable Final Edition</title>
     <style>
         /* Resetting default styles */
         body, html {
@@ -150,7 +150,7 @@
             text-transform: uppercase;
         }
 
-        /* Debug Section */
+         /* Debug Section */
         #debug-info {
             position: absolute;
             top: 10px;
@@ -183,16 +183,16 @@
         <div id="server-status">
             Server: AB Siddik's Private Instance • Systems Online
         </div>
-        <div id="debug-info"></div> <!-- Added Debug Section -->
+           <div id="debug-info"></div>
     </div>
 
     <script>
-        // Load franc
+         // Load franc
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/franc@6.1.0/franc.min.js';
         document.head.appendChild(script);
 
-       // API Key (NEVER commit this to public repos!)
+         //API Key (NEVER commit this to public repos!)
         const API_KEY = "AIzaSyDyu0thYNv9bhUlpRxxQbWZq59Wfm9ZDGc";
         const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=" + API_KEY;
 
@@ -224,7 +224,7 @@
             speechSynth.speak(utterThis);
         }
 
-        // Function of Comand
+         // Function of Comand
         async function processCommand(command) {
             try {
                 const response = await fetch(GEMINI_API_URL, {
@@ -259,7 +259,8 @@
                 speak(`Error: Gemini API unavailable. Check connection.`); //Speak in what happen
             }
         }
-           // Detect and process language
+
+        // Detect and process language
         async function detectAndProcess(command) {
             try {
                 const detectedLangCode = franc(command, {minLength: 3}); //franc detect
@@ -270,10 +271,17 @@
             processCommand(command);
         }
 
-        // Intilate Recongnition
-        if (SpeechRecognition) {
+       // Initsall Speech and Recongnition
+        function initializeSpeechRecognition() {
+            if (!SpeechRecognition) {
+                console.log("Speech recognition is not supported in this browser.");
+                updateDebugInfo("Speech recognition is not supported in this browser.");
+                speak("Speech recognition is not supported in this browser.");
+                return false; // Return false if speech recognition is not supported
+            }
+
             recognition = new SpeechRecognition();
-            recognition.continuous = true; // Keep listening
+            recognition.continuous = true;
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
@@ -288,7 +296,6 @@
                 const speechResult = event.results[0][0].transcript;
                 console.log("Heard: " + speechResult);
                 updateDebugInfo(`Heard: ${speechResult}`); // Debug info
-
                 detectAndProcess(speechResult);
             };
 
@@ -307,13 +314,10 @@
                 updateDebugInfo("Speech recognition ended, restarting...");
                 recognition.start(); // Aut restart
             };
-        } else {
-            console.log("Speech recognition is not supported in this browser.");
-            updateDebugInfo("Speech recognition is not supported in this browser.");
-            speak("Speech recognition is not supported in this browser."); //speak also if its suported
+            return true; // Return true if speech recognition setup was successful
         }
 
-       // Initilization of audio
+        // Initilization of audio
         function initializeAudio() {
             if (isInitialized) return;
 
@@ -329,8 +333,10 @@
                         source.connect(analyser);
                         analyser.connect(audioContext.destination);
                         analyzeAudio();
-                        recognition.start();
-                        updateDebugInfo("Microphone access granted, audio analysis started.");
+                        if (initializeSpeechRecognition()) { // Only start recognition if audio and recognition setup is successful
+                            recognition.start();
+                            updateDebugInfo("Microphone access granted, audio analysis and recognition started.");
+                        }
                     })
                     .catch(err => {
                         console.error('Error accessing microphone:', err);
@@ -363,16 +369,15 @@
             }
             draw();
         }
-
-         // Function to display debug information
+       // Function to display debug information
         function updateDebugInfo(message) {
             debugInfo.textContent += message + "\n";
         }
-
         // Initilize start to audio
         document.addEventListener("DOMContentLoaded", () => {
             initializeAudio(); // Start the audio
         });
+
     </script>
 </body>
 </html>

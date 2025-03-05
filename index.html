@@ -1,383 +1,231 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AB Siddik's Jarvis - Stable Final Edition</title>
-    <style>
-        /* Resetting default styles */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-        }
+  <title>Enhanced Motion Detector with Gemini API</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      text-align: center;
+      margin: 20px;
+    }
 
-        body {
-            background-color: #111;
-            color: #00FFFF;
-            font-family: 'Consolas', monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            background-color: #000;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.9) 50%, rgba(255, 255, 255, 0.05) 50%),
-                              linear-gradient(90deg, rgba(255, 255, 255, 0.06) 50%, rgba(0, 0, 0, 0.9) 50%);
-            background-size: 100% 2px, 2px 100%;
-            position: relative;
-        }
+    h1 {
+      color: #007bff; /* Primary color */
+    }
 
-        #jarvis-container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+    #video-container {
+      position: relative;
+      width: 640px;
+      margin: 0 auto; /* Center the video */
+    }
 
-        /* Listening Indicator */
-        #listening-indicator {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 4px double #00FFFF;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            animation: pulse 2s linear infinite, flicker 0.5s linear infinite;
-        }
+    #video {
+      width: 100%;
+      height: auto;
+      border: 2px solid #555; /* Darker border */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+      border-radius: 8px; /* Rounded corners */
+    }
 
-        /* Pulse */
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-            }
-            50% {
-                box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
-            }
-            100% {
-                box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
-            }
-        }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #28a745; /* Success color */
+    }
 
-        /* Flicker */
-        @keyframes flicker {
-            0% {
-                opacity: 0.9;
-            }
-            20% {
-                opacity: 0.7;
-            }
-            40% {
-                opacity: 0.9;
-            }
-            60% {
-                opacity: 0.6;
-            }
-            80% {
-                opacity: 0.9;
-            }
-            100% {
-                opacity: 1;
-            }
-        }
+    #status.error {
+      color: #dc3545; /* Error color */
+    }
 
-        /* Waveform Bars */
-        .waveform-bar {
-            width: 6px;
-            background-color: #00FFFF;
-            margin: 0 3px;
-            height: 4px;
-            transform-origin: bottom;
-            animation: barShift 0.8s ease-in-out infinite alternate, barOpacity 1.2s ease-in-out infinite alternate;
-        }
+    #loading {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 10;
+    }
 
-        /* Bar Shift */
-        @keyframes barShift {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-3px); }
-        }
+    /* Added loading animation using CSS */
+    .spinner {
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 5px solid white;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
 
-        /* Bar Opacity */
-        @keyframes barOpacity {
-            0% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-        /* Arrange bars horizontally */
-        #waveform-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #listening-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1.1em;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #00FFFF;
-            animation: loadingText 3s steps(20, end) forwards, blinkCursor 0.75s step-end infinite;
-            overflow: hidden;
-            white-space: nowrap;
-            width: 0;
-        }
-
-        @keyframes loadingText {
-            from { width: 0; }
-            to { width: 100%; }
-        }
-
-        @keyframes blinkCursor {
-            from, to { border-right: .05em solid transparent }
-            50% { border-right: .05em solid #00FFFF; }
-        }
-
-        #server-status {
-            position: absolute;
-            bottom: 20px;
-            font-size: 0.8em;
-            color: #00FFFF;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-         /* Debug Section */
-        #debug-info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: #FFFF00;
-            font-size: 0.7em;
-            white-space: pre-wrap; /* Keep line breaks */
-            text-align: left;
-        }
-    </style>
+  </style>
 </head>
 <body>
-
-    <div id="jarvis-container">
-        <div id="listening-indicator">
-            <div id="waveform-container">
-                <div class="waveform-bar"></div>
-                <div class="waveform-bar"></div>
-                <div class="waveform-bar"></div>
-                <div class="waveform-bar"></div>
-                <div class="waveform-bar"></div>
-                <div class="waveform-bar"></div>
-                <div class="waveform-bar"></div>
-                <div class="waveform-bar"></div>
-                <div class="waveform-bar"></div>
-                <div class="waveform-bar"></div>
-            </div>
-            <div id="listening-text">Initializing Systems...</div>
-        </div>
-        <div id="server-status">
-            Server: AB Siddik's Private Instance • Systems Online
-        </div>
-           <div id="debug-info"></div>
+  <h1>Enhanced Motion Detector</h1>
+  <div id="video-container">
+    <video id="video" autoplay playsinline></video>
+    <div id="loading">
+      <div class="spinner"></div>
+      Analyzing...
     </div>
+  </div>
+  <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+  <div id="status"></div>
 
-    <script>
-         // Load franc
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/franc@6.1.0/franc.min.js';
-        document.head.appendChild(script);
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const statusDiv = document.getElementById('status');
+    const loadingDiv = document.getElementById('loading');
 
-         //API Key (NEVER commit this to public repos!)
-        const API_KEY = "AIzaSyDyu0thYNv9bhUlpRxxQbWZq59Wfm9ZDGc";
-        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=" + API_KEY;
+    let lastImageData = null;
+    let detectingMotion = false;
 
-        // DOM Elements
-        const listeningIndicator = document.getElementById("listening-indicator");
-        const waveformBars = document.querySelectorAll(".waveform-bar");
-        const listeningText = document.getElementById("listening-text");
-        const debugInfo = document.getElementById("debug-info"); // debug info from the bottom
+    // *****************************************************************
+    //  IMPORTANT:  Store your API key securely. Do NOT hardcode it!
+    //  Consider using environment variables or a configuration file.
+    // *****************************************************************
+    const apiKey = 'AIzaSyCuidd3GOSAck24jDAgFpdqZBnINsFA79k'; // REPLACE WITH YOUR API KEY
 
-        // Speech Recognition Setup
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition = null;
-        let audioContext = null;
-        let analyser = null;
-        let isInitialized = false;
 
-        // Text-to-Speech
-        let speechSynth = window.speechSynthesis;
 
-        // Speak with the Audio
-        function speak(text) {
-            if (speechSynth.speaking) {
-                speechSynth.cancel();
-            }
-            let utterThis = new SpeechSynthesisUtterance(text);
-            utterThis.pitch = 1;
-            utterThis.rate = 1;
+    // Function to start the camera
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false }); // Specific camera
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+          video.play();
+          detectMotion();
+        };
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+        statusDiv.textContent = "Error accessing camera. Check permissions.";
+        statusDiv.classList.add('error');
+      }
+    }
 
-            speechSynth.speak(utterThis);
+
+    // Function to detect motion
+    function detectMotion() {
+      if (detectingMotion) return;
+
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const currentImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+      if (lastImageData) {
+        const difference = calculateDifference(currentImageData.data, lastImageData.data);
+
+        if (difference > 5000) {
+          statusDiv.textContent = "Motion Detected! Analyzing...";
+          loadingDiv.style.display = 'block'; // Show loading spinner
+          detectingMotion = true;
+          analyzeImage(canvas.toDataURL('image/jpeg'));
+        } else {
+          statusDiv.textContent = "No Motion Detected.";
+          statusDiv.classList.remove('error');
+        }
+      }
+
+      lastImageData = currentImageData;
+      setTimeout(detectMotion, 100);
+    }
+
+
+    // Function to calculate the difference between image data
+    function calculateDifference(data1, data2) {
+      let diff = 0;
+      for (let i = 0; i < data1.length; i += 4) {
+        diff += Math.abs(data1[i] - data2[i]);
+        diff += Math.abs(data1[i + 1] - data2[i + 1]);
+        diff += Math.abs(data1[i + 2] - data2[i + 2]);
+      }
+      return diff;
+    }
+
+
+
+    // Function to analyze the image with Gemini API
+    async function analyzeImage(imageData) {
+      try {
+        if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY') {
+          statusDiv.textContent = "ERROR: Please replace 'YOUR_GEMINI_API_KEY' with your actual Gemini API key.";
+          statusDiv.classList.add('error');
+          loadingDiv.style.display = 'none'; //hide loading
+          detectingMotion = false; //clear flag
+          return;
         }
 
-         // Function of Comand
-        async function processCommand(command) {
-            try {
-                const response = await fetch(GEMINI_API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: command }],
-                        }],
-                    }),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Gemini API Error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log("Gemini API Response:", data);
-
-                let jarvisResponseText = "Error: Could not process response.";
-
-                if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
-                    jarvisResponseText = data.candidates[0].content.parts[0].text;
-                }
-                speak(jarvisResponseText);
-
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                updateDebugInfo(`Gemini API Error: ${error}`); // log and show what the error
-                speak(`Error: Gemini API unavailable. Check connection.`); //Speak in what happen
-            }
-        }
-
-        // Detect and process language
-        async function detectAndProcess(command) {
-            try {
-                const detectedLangCode = franc(command, {minLength: 3}); //franc detect
-            } catch (error) {
-                console.error("Language detection error:", error);
-                processCommand(command); // Fallback to English
-            }
-            processCommand(command);
-        }
-
-       // Initsall Speech and Recongnition
-        function initializeSpeechRecognition() {
-            if (!SpeechRecognition) {
-                console.log("Speech recognition is not supported in this browser.");
-                updateDebugInfo("Speech recognition is not supported in this browser.");
-                speak("Speech recognition is not supported in this browser.");
-                return false; // Return false if speech recognition is not supported
-            }
-
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            recognition.onstart = function() {
-                console.log("Speech recognition started");
-                listeningIndicator.style.display = "block";
-                listeningText.textContent = "Listening";
-                updateDebugInfo("Speech recognition started.");
-            };
-
-            recognition.onresult = function(event) {
-                const speechResult = event.results[0][0].transcript;
-                console.log("Heard: " + speechResult);
-                updateDebugInfo(`Heard: ${speechResult}`); // Debug info
-                detectAndProcess(speechResult);
-            };
-
-            recognition.onspeechend = function() {
-                console.log("Speech ended");
-            };
-
-            recognition.onerror = function(event) {
-                console.error("Speech recognition error:", event.error);
-                updateDebugInfo(`Speech Recognition Error: ${event.error}`);
-                speak("Sorry, I encountered a speech recognition error. Please try again.");
-            };
-
-            recognition.onend = function() {
-                console.log("Speech recognition ended");
-                updateDebugInfo("Speech recognition ended, restarting...");
-                recognition.start(); // Aut restart
-            };
-            return true; // Return true if speech recognition setup was successful
-        }
-
-        // Initilization of audio
-        function initializeAudio() {
-            if (isInitialized) return;
-
-            try {
-                window.AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioContext = new AudioContext();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 256;
-
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(stream => {
-                        const source = audioContext.createMediaStreamSource(stream);
-                        source.connect(analyser);
-                        analyser.connect(audioContext.destination);
-                        analyzeAudio();
-                        if (initializeSpeechRecognition()) { // Only start recognition if audio and recognition setup is successful
-                            recognition.start();
-                            updateDebugInfo("Microphone access granted, audio analysis and recognition started.");
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error accessing microphone:', err);
-                        updateDebugInfo(`Error accessing microphone: ${err}`);
-                        speak("Microphone access denied or unavailable.");
-                    });
-            } catch (e) {
-                console.error('Web Audio API is not supported in this browser');
-                updateDebugInfo(`Web Audio API not supported: ${e}`);
-                speak("Web Audio API is not supported in this browser.");
-            }
-            isInitialized = true;
-        }
-
-        // Analiza audio
-        function analyzeAudio() {
-            if (!audioContext) return;
-
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-
-            function draw() {
-                analyser.getByteFrequencyData(dataArray);
-
-                for (let i = 0; i < waveformBars.length; i++) {
-                    const barHeight = Math.max(4, dataArray[i % bufferLength] / 2);
-                    waveformBars[i].style.height = `${barHeight}px`;
-                }
-                requestAnimationFrame(draw);
-            }
-            draw();
-        }
-       // Function to display debug information
-        function updateDebugInfo(message) {
-            debugInfo.textContent += message + "\n";
-        }
-        // Initilize start to audio
-        document.addEventListener("DOMContentLoaded", () => {
-            initializeAudio(); // Start the audio
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: "Identify and describe all the objects in this image, focusing on details relevant to security, such as people, vehicles, weapons, or unusual items.  If possible give a brief description. Return only the description. Don't include any extra text before it. Do not say Image provided."
+                  },
+                  {
+                    inline_data: {
+                      mime_type: "image/jpeg",
+                      data: imageData.split(',')[1]
+                    }
+                  }
+                ]
+              }
+            ]
+          })
         });
 
-    </script>
+        if (!response.ok) {
+          console.error("Gemini API Error:", response.status, response.statusText);
+          statusDiv.textContent = `Gemini API Error: ${response.status} ${response.statusText}`;
+          statusDiv.classList.add('error');
+          loadingDiv.style.display = 'none'; // Hide loading spinner
+          detectingMotion = false;
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+          const objectDescription = data.candidates[0].content.parts[0].text;
+          statusDiv.textContent = "Motion Detected! Objects: " + objectDescription;
+          statusDiv.classList.remove('error');
+
+        } else {
+          statusDiv.textContent = "Motion Detected, but could not identify objects.";
+          statusDiv.classList.add('error');
+        }
+
+      } catch (error) {
+        console.error("Error analyzing image:", error);
+        statusDiv.textContent = "Error analyzing image with Gemini API: " + error;
+        statusDiv.classList.add('error');
+      } finally {
+        loadingDiv.style.display = 'none'; // Hide loading spinner
+        detectingMotion = false;
+      }
+    }
+
+
+    // Start the camera when the page loads
+    startCamera();
+  </script>
 </body>
 </html>

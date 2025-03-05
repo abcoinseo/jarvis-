@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AB Siddik's Jarvis - Voice & Visual Only</title>
+    <title>AB Siddik's Jarvis - Voice Visualized (Optimized)</title>
     <style>
         /* Resetting default styles */
         body, html {
@@ -14,18 +14,19 @@
         }
 
         body {
-            background-color: #000; /* Dark Background */
-            color: #0A84FF; /* Cool Blue Text */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+            background-color: #111; /* Darker background */
+            color: #00BFFF; /* Electric blue */
+            font-family: 'Roboto', sans-serif; /* Modern font */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            /* Grid background */
-            background-image: linear-gradient(to right, rgba(10, 132, 255, 0.1) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(10, 132, 255, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px; /* Adjust grid size as needed */
+            /* Advanced grid background */
+            background-image: radial-gradient(rgba(0, 191, 255, 0.15) 1px, transparent 1px),
+                              radial-gradient(rgba(0, 191, 255, 0.15) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px; /* Offset for staggered effect */
         }
 
         #jarvis-container {
@@ -40,25 +41,38 @@
 
         /* Listening Indicator (Central Circle) */
         #listening-indicator {
-            width: 150px; /* Adjust size as needed */
-            height: 150px;
+            width: 160px; /* Slightly larger */
+            height: 160px;
             border-radius: 50%;
-            border: 2px solid #0A84FF;
+            border: 3px solid #00BFFF; /* Stronger border */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative; /* For absolute positioning of bars */
-            margin-bottom: 20px;
+            animation: spin 15s linear infinite; /* Eye like slow spin */
+        }
+
+        /* Eye Spin */
+        @keyframes spin {
+            from {transform: rotate(0deg);}
+            to {transform: rotate(360deg);}
         }
 
         /* Waveform Bars */
         .waveform-bar {
-            width: 4px;
-            background-color: #0A84FF;
+            width: 5px;
+            background-color: #00BFFF;
             margin: 0 2px;
-            height: 2px; /* Initial height */
+            height: 3px; /* Tiny base height */
             transform-origin: bottom;
+            animation: barFade 0.7s ease-in-out infinite alternate; /* Bar Fade */
+        }
+
+         /* Bar Fade */
+        @keyframes barFade {
+            0% { opacity: 0.4; }
+            100% { opacity: 1; }
         }
 
         /* Arrange bars horizontally */
@@ -66,18 +80,18 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 5px; /* Space between bars and "Listening" text */
         }
 
-        /* "Listening" Text */
+        /* Center "Listening" Text (Optional - may be hidden) */
         #listening-text {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 0.8em;
+            font-size: 0.9em;
             letter-spacing: 1px;
             text-transform: uppercase;
+            color: #70dbff;
         }
     </style>
 </head>
@@ -102,30 +116,29 @@
     </div>
 
     <script>
-    //Load franc.js
+    // Load franc
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/franc@6.1.0/franc.min.js';
     document.head.appendChild(script);
 
-   // API Key (NEVER commit this to public repos!)
+    //API Key (NEVER commit this to public repos!)
     const API_KEY = "AIzaSyDyu0thYNv9bhUlpRxxQbWZq59Wfm9ZDGc";
     const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=" + API_KEY;
 
-        // DOM Elements
+        //DOM Elements
         const listeningIndicator = document.getElementById("listening-indicator");
         const waveformBars = document.querySelectorAll(".waveform-bar");
 
-        // Speech Recognition Setup
+        //Speech Recognition Setup
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let audioContext = null;
         let analyser = null;
 
-        // Text-to-Speech
+        //Text-to-Speech
         let speechSynth = window.speechSynthesis;
 
-        //Initialize Audio
-
+        //Speak with the Audio
         function speak(text) {
             if (speechSynth.speaking) {
                 speechSynth.cancel();
@@ -136,26 +149,7 @@
 
             speechSynth.speak(utterThis);
         }
-
-        // Analyze Audio to control the visualy
-        function analyzeAudio() {
-            if (!audioContext) return;
-
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-
-            function draw() {
-                analyser.getByteFrequencyData(dataArray);
-
-                for (let i = 0; i < waveformBars.length; i++) {
-                    const barHeight = dataArray[i % bufferLength] / 2; // Scaling factor
-                    waveformBars[i].style.height = `${barHeight}px`;
-                }
-                requestAnimationFrame(draw);
-            }
-            draw();
-        }
-
+        // Function of Comand
         async function processCommand(command) {
 
             try {
@@ -191,19 +185,18 @@
                 speak(`Error: ${error.message}`);
             }
         }
-
-        // Language Detection and Command Processing
+         // Detect and process language
         async function detectAndProcess(command) {
-
-            try {
-                const detectedLangCode = franc(command, {minLength: 3}); //franc detect
-            } catch (error) {
-                console.error("Language detection error:", error);
-                processCommand(command); // Fallback to English
+                try {
+                    const detectedLangCode = franc(command, {minLength: 3}); //franc detect
+                } catch (error) {
+                    console.error("Language detection error:", error);
+                    processCommand(command); // Fallback to English
+                }
+                processCommand(command);
             }
-            processCommand(command);
-        }
 
+        // Intilate Recongnition
         if (SpeechRecognition) {
 
             recognition = new SpeechRecognition();
@@ -267,7 +260,26 @@
                 console.error('Web Audio API is not supported in this browser');
             }
         }
-        //Initilize start to audio
+
+        function analyzeAudio() {
+            if (!audioContext) return;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                analyser.getByteFrequencyData(dataArray);
+
+                for (let i = 0; i < waveformBars.length; i++) {
+                    const barHeight = Math.max(3, dataArray[i % bufferLength] / 2); // Min height of 3px
+                    waveformBars[i].style.height = `${barHeight}px`;
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        // Initilize start to audio
         document.addEventListener("DOMContentLoaded", () => {
             initializeAudio();
         });

@@ -3,34 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AB Siddik's Jarvis - Voice Visualized (Optimized)</title>
+    <title>AB Siddik's Jarvis - Final Build</title>
     <style>
         /* Resetting default styles */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            overflow: hidden; /* Prevents scrollbars */
+            overflow: hidden;
         }
 
         body {
-            background-color: #111; /* Darker background */
-            color: #00BFFF; /* Electric blue */
-            font-family: 'Roboto', sans-serif; /* Modern font */
+            background-color: #111;
+            color: #00FFFF; /* Cyan */
+            font-family: 'Consolas', monospace; /* Hacker-style font */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            /* Advanced grid background */
-            background-image: radial-gradient(rgba(0, 191, 255, 0.15) 1px, transparent 1px),
-                              radial-gradient(rgba(0, 191, 255, 0.15) 1px, transparent 1px);
-            background-size: 40px 40px;
-            background-position: 0 0, 20px 20px; /* Offset for staggered effect */
+            /* Custom Background - Subtle Scanlines */
+            background-color: #000;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.9) 50%, rgba(255, 255, 255, 0.05) 50%),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.06) 50%, rgba(0, 0, 0, 0.9) 50%);
+            background-size: 100% 2px, 2px 100%;
+            /* Unique "Server" styling */
+            position: relative;
         }
 
         #jarvis-container {
-            /* Take up full screen */
             width: 100vw;
             height: 100vh;
             display: flex;
@@ -39,39 +40,76 @@
             justify-content: center;
         }
 
-        /* Listening Indicator (Central Circle) */
+        /* Listening Indicator (Central Core) */
         #listening-indicator {
-            width: 160px; /* Slightly larger */
-            height: 160px;
+            width: 180px; /* Larger */
+            height: 180px;
             border-radius: 50%;
-            border: 3px solid #00BFFF; /* Stronger border */
+            border: 4px double #00FFFF; /* Stronger border */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative; /* For absolute positioning of bars */
-            animation: spin 15s linear infinite; /* Eye like slow spin */
+            position: relative;
+            /* Advanced animation: Pulse and Flicker */
+            animation: pulse 2s linear infinite, flicker 0.5s linear infinite;
         }
 
-        /* Eye Spin */
-        @keyframes spin {
-            from {transform: rotate(0deg);}
-            to {transform: rotate(360deg);}
+        /* Pulse */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
+            }
+            100% {
+                box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            }
         }
 
-        /* Waveform Bars */
+        /* Flicker */
+        @keyframes flicker {
+            0% {
+                opacity: 0.9;
+            }
+            20% {
+                opacity: 0.7;
+            }
+            40% {
+                opacity: 0.9;
+            }
+            60% {
+                opacity: 0.6;
+            }
+            80% {
+                opacity: 0.9;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Waveform Bars - Enhanced */
         .waveform-bar {
-            width: 5px;
-            background-color: #00BFFF;
-            margin: 0 2px;
-            height: 3px; /* Tiny base height */
+            width: 6px;
+            background-color: #00FFFF;
+            margin: 0 3px;
+            height: 4px; /* Increased height */
             transform-origin: bottom;
-            animation: barFade 0.7s ease-in-out infinite alternate; /* Bar Fade */
+            /* Advanced animation: Bar Shift + Opacity */
+            animation: barShift 0.8s ease-in-out infinite alternate, barOpacity 1.2s ease-in-out infinite alternate;
         }
 
-         /* Bar Fade */
-        @keyframes barFade {
-            0% { opacity: 0.4; }
+        /* Bar Shift */
+        @keyframes barShift {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-3px); } /* Slight Vertical Shift */
+        }
+
+        /* Bar Opacity */
+        @keyframes barOpacity {
+            0% { opacity: 0.5; }
             100% { opacity: 1; }
         }
 
@@ -82,16 +120,40 @@
             align-items: center;
         }
 
-        /* Center "Listening" Text (Optional - may be hidden) */
+        /* Make Listening Text optional */
         #listening-text {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 0.9em;
+            font-size: 1.1em; /* Slightly larger */
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #00FFFF; /* Same Cyan */
+            /* Simulate Server Loading Text */
+            animation: loadingText 3s steps(20, end) forwards, blinkCursor 0.75s step-end infinite;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 0; /* Initial width */
+        }
+
+        @keyframes loadingText {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blinkCursor {
+            from, to { border-right: .05em solid transparent }
+            50% { border-right: .05em solid #00FFFF; }
+        }
+        #server-status {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.8em;
+            color: #00FFFF;
             letter-spacing: 1px;
             text-transform: uppercase;
-            color: #70dbff;
+            /* Add more styles to make it look like server status */
         }
     </style>
 </head>
@@ -111,34 +173,40 @@
                 <div class="waveform-bar"></div>
                 <div class="waveform-bar"></div>
             </div>
-            <div id="listening-text">Listening</div>
+            <div id="listening-text">Initializing Systems...</div>
+        </div>
+        <div id="server-status">
+            Server: AB Siddik's Private Instance • Systems Online
         </div>
     </div>
 
     <script>
-    // Load franc
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/franc@6.1.0/franc.min.js';
-    document.head.appendChild(script);
 
-    //API Key (NEVER commit this to public repos!)
-    const API_KEY = "AIzaSyDyu0thYNv9bhUlpRxxQbWZq59Wfm9ZDGc";
-    const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=" + API_KEY;
+        // Load franc
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/franc@6.1.0/franc.min.js';
+        document.head.appendChild(script);
 
-        //DOM Elements
+        // API Key (NEVER commit this to public repos!)
+        const API_KEY = "AIzaSyDyu0thYNv9bhUlpRxxQbWZq59Wfm9ZDGc";
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=" + API_KEY;
+
+        // DOM Elements
         const listeningIndicator = document.getElementById("listening-indicator");
         const waveformBars = document.querySelectorAll(".waveform-bar");
+        const listeningText = document.getElementById("listening-text");
 
-        //Speech Recognition Setup
+        // Speech Recognition Setup
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let audioContext = null;
         let analyser = null;
+        let isInitialized = false; // Track initialization
 
-        //Text-to-Speech
+        // Text-to-Speech
         let speechSynth = window.speechSynthesis;
 
-        //Speak with the Audio
+        // Speak with the Audio
         function speak(text) {
             if (speechSynth.speaking) {
                 speechSynth.cancel();
@@ -149,9 +217,9 @@
 
             speechSynth.speak(utterThis);
         }
+
         // Function of Comand
         async function processCommand(command) {
-
             try {
                 const response = await fetch(GEMINI_API_URL, {
                     method: "POST",
@@ -185,19 +253,18 @@
                 speak(`Error: ${error.message}`);
             }
         }
+
          // Detect and process language
         async function detectAndProcess(command) {
-                try {
-                    const detectedLangCode = franc(command, {minLength: 3}); //franc detect
-                } catch (error) {
-                    console.error("Language detection error:", error);
-                    processCommand(command); // Fallback to English
-                }
-                processCommand(command);
+            try {
+                const detectedLangCode = franc(command, {minLength: 3}); //franc detect
+            } catch (error) {
+                console.error("Language detection error:", error);
+                processCommand(command); // Fallback to English
             }
-
-        // Intilate Recongnition
-        if (SpeechRecognition) {
+            processCommand(command);
+        }
+                if (SpeechRecognition) {
 
             recognition = new SpeechRecognition();
             recognition.continuous = true;
@@ -207,6 +274,8 @@
             recognition.onstart = function() {
                 console.log("Speech recognition started");
                 listeningIndicator.style.display = "block";
+                listeningText.textContent = "Listening"; // Change Text
+
             };
 
             recognition.onresult = function(event) {
@@ -237,6 +306,8 @@
 
         // Initilization of audio
         function initializeAudio() {
+            if (isInitialized) return;  // Ensure this only runs once
+
             try {
                 window.AudioContext = window.AudioContext || window.webkitAudioContext;
                 audioContext = new AudioContext();
@@ -254,13 +325,18 @@
                     })
                     .catch(err => {
                         console.error('Error accessing microphone:', err);
-
+                        //Fallback Message
+                        speak("Microphone access denied or unavailable.");
                     });
             } catch (e) {
                 console.error('Web Audio API is not supported in this browser');
+                // Fallback for old version to use speach
+                speak("Web Audio API is not supported in this browser.");
             }
+            isInitialized = true;  //Audio success run with no erros
         }
 
+        // Analyza audio
         function analyzeAudio() {
             if (!audioContext) return;
 
@@ -271,17 +347,16 @@
                 analyser.getByteFrequencyData(dataArray);
 
                 for (let i = 0; i < waveformBars.length; i++) {
-                    const barHeight = Math.max(3, dataArray[i % bufferLength] / 2); // Min height of 3px
+                    const barHeight = Math.max(4, dataArray[i % bufferLength] / 2); // Min height of 4px
                     waveformBars[i].style.height = `${barHeight}px`;
                 }
                 requestAnimationFrame(draw);
             }
             draw();
         }
-
         // Initilize start to audio
         document.addEventListener("DOMContentLoaded", () => {
-            initializeAudio();
+            initializeAudio(); // Start the audio
         });
 
     </script>
